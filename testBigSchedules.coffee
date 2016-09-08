@@ -45,12 +45,8 @@ describe "BigSchedules", ->
       browser.sleep 10000
 
       carrierList = []
-      # nextPage = null
-      # state = "ok"
-
-      # collectDataAndGoToNextPage = () ->
-      # Q = require "q"
-      # defer = Q.defer()
+      carrierListTemp = []
+      nextPageYes = true
 
       tabs = element.all(By.css "[name=routes_a_carrier]").map((elm) -> elm.getText())
       tabs.then((text) -> 
@@ -58,32 +54,26 @@ describe "BigSchedules", ->
         carrierList.push text
         return)
       
-      # This is a function checking if there is a class ‘disabled’
-      hasClass = ((elm, cls) ->
-        console.log elm
-        element(By.css elm).getAttribute('class')).then (classes) ->
-          console.log classes 
+      # This is a function checking if there is class disabled
+      hasClass = (elm, cls) ->
+        element(By.css elm).getAttribute('class').then (classes) ->
           classes.split(' ').indexOf(cls) != -1
       
       browser.wait(->
         carrierList != []).then ->
            #console.log carrierList
            nextPage = element(By.css "[title='Next Page']")
-           nextPage.getAttribute('class').then (classes) -> 
-             console.log classes
-             return
-           browser.executeScript("arguments[0].scrollIntoView();", nextPage.getWebElement()).then ->
-             console.log "scroll down"
-             browser.sleep 10000
-             hasClass("[title='Next Page']", 'disabled').then (class_found) ->
-               if class_found
-                    console.log "Not enabled"
-               else
+           hasClass("[title='Next Page']", 'disabled').then (class_found) ->
+             if class_found
+                  console.log "Not enabled"
+             else
+                  console.log "Enabled"
+                  browser.executeScript("arguments[0].scrollIntoView();", nextPage.getWebElement()).then ->
                     nextPageGo = element(By.css "[title='Next Page'] span[class=ng-binding]")
-                    console.log "next"
-                    nextPageGo.sendKeys "\n"
-                    browser.sleep 10000
-                    console.log "next page"                    
+                    nextPageGo.click()
+                    .then -> 
+                      browser.sleep 10000
+                      console.log "next page"                    
              return
            return
 
