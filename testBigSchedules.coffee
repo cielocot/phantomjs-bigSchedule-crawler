@@ -30,7 +30,7 @@ describe "BigSchedules", ->
       
       popupCloseBtn.click().then ->
         
-        targetOriginalInput.sendKeys “Shan”
+        targetOriginalInput.sendKeys "Shan"
         .then ->
           originDropDownFirstChild = element By.css("#targetOriginal+.autocomplete>li>a:first-child")
           originDropDownFirstChild.click().then ->
@@ -58,12 +58,32 @@ describe "BigSchedules", ->
         carrierList.push text
         return)
       
+      hasClass = ((elm, cls) ->
+        console.log elm
+        element(By.css elm).getAttribute('class')).then (classes) ->
+          console.log classes 
+          classes.split(' ').indexOf(cls) != -1
+      
       browser.wait(->
         carrierList != []).then ->
            #console.log carrierList
-           nextPage = element(By.css("[title='Next Page']:not(.disabled)"))
-           console.log "!!! nextPage.isPresent()", nextPage.isPresent()
-           nextPage.click().then -> console.log "next"
+           nextPage = element(By.css "[title='Next Page']")
+           nextPage.getAttribute('class').then (classes) -> 
+             console.log classes
+             return
+           browser.executeScript("arguments[0].scrollIntoView();", nextPage.getWebElement()).then ->
+             console.log "scroll down"
+             browser.sleep 10000
+             hasClass("[title='Next Page']", 'disabled').then (class_found) ->
+               if class_found
+                    console.log "Not enabled"
+               else
+                    nextPageGo = element(By.css "[title='Next Page'] span[class=ng-binding]")
+                    console.log "next"
+                    nextPageGo.sendKeys "\n"
+                    browser.sleep 10000
+                    console.log "next page"                    
+             return
            return
 
       # nextPage = element.all By.css ".pagination>.active+li:not(.disabled)"
