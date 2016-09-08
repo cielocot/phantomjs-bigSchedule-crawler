@@ -58,6 +58,7 @@ describe "BigSchedules", ->
         carrierList.push text
         return)
       
+      # This is a function checking if there is a class ‘disabled’
       hasClass = ((elm, cls) ->
         console.log elm
         element(By.css elm).getAttribute('class')).then (classes) ->
