@@ -46,36 +46,40 @@ describe "BigSchedules", ->
 
       carrierList = []
       carrierListTemp = []
-      nextPageYes = true
 
-      tabs = element.all(By.css "[name=routes_a_carrier]").map((elm) -> elm.getText())
-      tabs.then((text) -> 
-        #console.log text
-        carrierList.push text
-        return)
-      
+
       # This is a function checking if there is class disabled
       hasClass = (elm, cls) ->
         element(By.css elm).getAttribute('class').then (classes) ->
           classes.split(' ').indexOf(cls) != -1
+ 
+      getCarrierList = (CL, CLTemp) ->
+        console.log "In function"
+        browser.wait ->
+          element.all(By.css "[name=routes_a_carrier]").map((elm) -> elm.getText()).then (text) ->
+            console.log text
+            CL.push text
+            browser.wait(->
+              CL.length != CLTemp.length).then ->
+                console.log CL.length
+                nextPage = element(By.css "[title='Next Page']")
+                return hasClass("[title='Next Page']", 'disabled').then (class_found) ->
+                  if class_found
+                     console.log CL
+                     return CL
+                  else
+                     console.log "Enabled"
+                     CLTemp = CL
+                     browser.executeScript("arguments[0].scrollIntoView();", nextPage.getWebElement()).then ->
+                       nextPageGo = element(By.css "[title='Next Page'] span[class=ng-binding]")
+                       nextPageGo.click().then -> 
+                         getCarrierList CL, CLTemp
+                       return
+                      #console.log "next page"                    
+                     return                 
+          return          
       
-      browser.wait(->
-        carrierList != []).then ->
-           #console.log carrierList
-           nextPage = element(By.css "[title='Next Page']")
-           hasClass("[title='Next Page']", 'disabled').then (class_found) ->
-             if class_found
-                  console.log "Not enabled"
-             else
-                  console.log "Enabled"
-                  browser.executeScript("arguments[0].scrollIntoView();", nextPage.getWebElement()).then ->
-                    nextPageGo = element(By.css "[title='Next Page'] span[class=ng-binding]")
-                    nextPageGo.click()
-                    .then -> 
-                      browser.sleep 10000
-                      console.log "next page"                    
-             return
-           return
+      getCarrierList carrierList, carrierListTemp
 
       # nextPage = element.all By.css ".pagination>.active+li:not(.disabled)"
       #nextPage = element(By.css("[title='Next Page']:not(.disabled)"))
